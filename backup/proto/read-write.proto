@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package backup;
+
+option go_package = "github.com/abhishek-kamat-nutanix/read-write-grpc/backup/proto";
+
+message DataRequest {
+    bytes data = 1;
+}
+
+message DataResponse {
+    string result = 1;
+}
+
+service BackupService {
+    rpc BackupBlock (stream DataRequest) returns (DataResponse);
+}
