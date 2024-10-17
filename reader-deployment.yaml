@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reader-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reader
+  template:
+    metadata:
+      labels:
+        app: reader
+    spec:
+      containers:
+      - name: reader
+        image: abhishekkamat27/grpc_reader:targetip
+        command: ["/bin/sh", "-c"]
+        args: [ "./client && tail -f /dev/null" ]
+        securityContext:
+          privileged: true
+        volumeDevices:
+        - name: diskreader-pvc
+          devicePath: /dev/xvda
+      volumes:
+      - name: diskreader-pvc
+        persistentVolumeClaim:
+          claimName: diskreader-pvc
+      imagePullSecrets:
+      - name: my-registry-secret    
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: diskreader-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName:  default-storageclass
+  volumeMode: Block
+  resources:
+    requests:
+      storage: 1Gi
+  dataSource:
+    name: source-sql
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io

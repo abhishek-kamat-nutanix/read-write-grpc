@@ -10,7 +10,7 @@ import (
 func doBackup(c pb.BackupServiceClient) {
 	log.Println("doBackup was invoked")
 
-	reqs := HandleBlock("/dev/loop0")
+	reqs := HandleBlock("/dev/xvda")
 
 	stream, err := c.BackupBlock(context.Background())
 

@@ -12,7 +12,7 @@ func (s *Server)BackupBlock(stream pb.BackupService_BackupBlockServer) error{
 
 	res := "Writer has completed writing"
 
-	devicePath := "/dev/loop1"
+	devicePath := "/dev/xvda"
 	device, err := os.OpenFile(devicePath, os.O_WRONLY, 0644)
 
 	if err != nil {

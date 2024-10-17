@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: writer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: writer
+  template:
+    metadata:
+      labels:
+        app: writer
+    spec:
+      containers:
+      - name: writer
+        image: abhishekkamat27/grpc_writer:v2
+        command: ["/bin/sh", "-c"]
+        args: [ "./server && tail -f /dev/null" ]
+        ports:
+        - containerPort: 50051
+        securityContext:
+          privileged: true
+        volumeDevices:
+        - name: diskwriter-pvc
+          devicePath: /dev/xvda
+      volumes:
+      - name: diskwriter-pvc
+        persistentVolumeClaim:
+          claimName: diskwriter-pvc
+      imagePullSecrets:
+      - name: my-registry-secret    
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: diskwriter-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName:  default-storageclass
+  volumeMode: Block
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-server-service
+spec:
+  selector:
+    app: writer
+  ports:
+    - protocol: TCP
+      port: 50051  # The exposed port for external access
+      targetPort: 50051  # The container's internal port
+  type: LoadBalancer  

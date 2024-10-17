@@ -10,7 +10,7 @@ import (
 	   
 )
 
-var addr string = "localhost:50051"
+var addr string = "10.46.60.85:50051"
 
 func main() {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))

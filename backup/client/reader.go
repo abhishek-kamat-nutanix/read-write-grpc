@@ -21,7 +21,7 @@ func HandleBlock(devicePath string) []*pb.DataRequest {
     defer device.Close()
 
     // Buffer to hold data read from the block device
-    buffer := make([]byte, 4096) // Adjust buffer size as needed
+    buffer := make([]byte, 4096) 
 
     for {
         n, err := device.Read(buffer)
