@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"flag"
 	
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -10,10 +11,11 @@ import (
 	   
 )
 
-var addr string = "10.46.60.85:50051"
 
 func main() {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	address := flag.String("addr","10.46.60.86:50051","writer server ip")
+	flag.Parse()
+	conn, err := grpc.NewClient(*address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err!=nil {
 		log.Fatalf("Failed to connect %v\n", err)

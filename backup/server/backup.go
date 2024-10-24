@@ -5,9 +5,11 @@ import (
 	"log"
 	"os"
 
+
 	pb "github.com/abhishek-kamat-nutanix/read-write-grpc/backup/proto"
 )
 func (s *Server)BackupBlock(stream pb.BackupService_BackupBlockServer) error{
+	
 	log.Println("BackupBlock function was invoked")
 
 	res := "Writer has completed writing"
@@ -23,6 +25,8 @@ func (s *Server)BackupBlock(stream pb.BackupService_BackupBlockServer) error{
 		req, err := stream.Recv()
 		
 		if err == io.EOF {
+			writer(&volumeName,&kubeconfig) // all data has been written, ready for snapshot
+			
 			return stream.SendAndClose(&pb.DataResponse{
 				Result: res,
 			})
@@ -41,4 +45,5 @@ func (s *Server)BackupBlock(stream pb.BackupService_BackupBlockServer) error{
 		}
 
 	}
+
 }
