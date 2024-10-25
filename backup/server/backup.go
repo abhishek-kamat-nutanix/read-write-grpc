@@ -21,11 +21,12 @@ func (s *Server)BackupBlock(stream pb.BackupService_BackupBlockServer) error{
         log.Printf("unable to open block device %s: %v", devicePath, err)
     }
 
+
 	for {
 		req, err := stream.Recv()
 		
 		if err == io.EOF {
-			writer(&volumeName,&kubeconfig) // all data has been written, ready for snapshot
+			writer() // all data has been written, ready for snapshot
 			
 			return stream.SendAndClose(&pb.DataResponse{
 				Result: res,
@@ -38,7 +39,7 @@ func (s *Server)BackupBlock(stream pb.BackupService_BackupBlockServer) error{
 
 		n, err := device.Write(req.Data)
 		if n > 0 {
-			// log.Printf("wrote %v bytes on disk",n)
+			// do nothing 
 		}
 		if err!= nil {
 			log.Printf("error writing to disk : %v",err)

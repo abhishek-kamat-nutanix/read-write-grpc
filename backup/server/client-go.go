@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	v2 "github.com/kubernetes-csi/external-snapshotter/client/v8/apis/volumesnapshot/v1"
 	"github.com/kubernetes-csi/external-snapshotter/client/v8/clientset/versioned"
@@ -11,24 +10,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
-func writer(volumeName *string, kubeconfig *string)  {
-
+func writer()  {
 
 	volume := "diskwriter-pvc"
 
-	config, err := clientcmd.BuildConfigFromFlags("",*kubeconfig)
+	config, err := rest.InClusterConfig()
+	if err!= nil {
+		fmt.Printf("error getting in-cluster config: %v\n", err)
+	}
 	
-	if err !=nil {
-		fmt.Printf("error building config from flags: %s\n",err.Error())
-		config, err = rest.InClusterConfig()
-
-		if err!= nil {
-			fmt.Printf("error getting kubeconfig: %v", err)
-		}
-	} 
 	
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil{
@@ -68,7 +60,7 @@ func writer(volumeName *string, kubeconfig *string)  {
 	m[resourceName] = *size
 	apiGroup := "snapshot.storage.k8s.io"
 	pvclaim := v1.PersistentVolumeClaim{TypeMeta: metav1.TypeMeta{Kind:"PersistentVolumeClaim",APIVersion:"v1"},
-										ObjectMeta: metav1.ObjectMeta{Name: *volumeName},
+										ObjectMeta: metav1.ObjectMeta{Name: volumeName},
 										Spec: v1.PersistentVolumeClaimSpec{StorageClassName: &storageClassName, 
 											VolumeMode: &volumeMode, 
 											Resources: v1.VolumeResourceRequirements{Limits: v1.ResourceList{},Requests: m}, 
@@ -81,14 +73,13 @@ func writer(volumeName *string, kubeconfig *string)  {
 	
 	create_pvc, err := clientset.CoreV1().PersistentVolumeClaims("default").Create(context.Background(),&pvclaim,metav1.CreateOptions{})
 	if err != nil{
-		fmt.Printf("error while creating pvc %v in default namespace: %v\n", *volumeName,err)
+		fmt.Printf("error while creating pvc %v in default namespace: %v\n", volumeName,err)
 	}
 	fmt.Printf("pvc created %s\n",create_pvc.UID)
 	
 	
-
 	for create_pvc.Status.Phase!= v1.ClaimBound {
-		create_pvc, err = clientset.CoreV1().PersistentVolumeClaims("default").Get(context.Background(),*volumeName,metav1.GetOptions{})
+		create_pvc, err = clientset.CoreV1().PersistentVolumeClaims("default").Get(context.Background(),volumeName,metav1.GetOptions{})
 		if err != nil{
 			fmt.Printf("error while getting pvc in default namespace: %v\n",err)
 		}
