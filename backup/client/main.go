@@ -2,8 +2,7 @@ package main
 
 import (
 	"log"
-	"flag"
-	
+	"os"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -11,11 +10,14 @@ import (
 	   
 )
 
-
 func main() {
-	address := flag.String("addr","10.46.60.86:50051","writer server ip")
-	flag.Parse()
-	conn, err := grpc.NewClient(*address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	addr := os.Getenv("GRPC_SERVER_ADDR")
+    if addr == "" {
+        log.Fatalf("GRPC_SERVER_ADDR environment variable is not set")
+    }
+
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err!=nil {
 		log.Fatalf("Failed to connect %v\n", err)
