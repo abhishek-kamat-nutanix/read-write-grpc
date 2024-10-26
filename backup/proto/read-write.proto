@@ -12,6 +12,15 @@ message DataResponse {
     string result = 1;
 }
 
+message NameRequest {
+    string name = 1;
+}
+
+message NameResponse {
+    string message = 1;
+}
+
 service BackupService {
+    rpc SendName (NameRequest) returns (NameResponse);
     rpc BackupBlock (stream DataRequest) returns (DataResponse);
 }

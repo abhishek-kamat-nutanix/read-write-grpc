@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	BackupService_SendName_FullMethodName    = "/backup.BackupService/SendName"
 	BackupService_BackupBlock_FullMethodName = "/backup.BackupService/BackupBlock"
 )
 
@@ -26,6 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BackupServiceClient interface {
+	SendName(ctx context.Context, in *NameRequest, opts ...grpc.CallOption) (*NameResponse, error)
 	BackupBlock(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[DataRequest, DataResponse], error)
 }
 
@@ -35,6 +37,16 @@ type backupServiceClient struct {
 
 func NewBackupServiceClient(cc grpc.ClientConnInterface) BackupServiceClient {
 	return &backupServiceClient{cc}
+}
+
+func (c *backupServiceClient) SendName(ctx context.Context, in *NameRequest, opts ...grpc.CallOption) (*NameResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NameResponse)
+	err := c.cc.Invoke(ctx, BackupService_SendName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *backupServiceClient) BackupBlock(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[DataRequest, DataResponse], error) {
@@ -54,6 +66,7 @@ type BackupService_BackupBlockClient = grpc.ClientStreamingClient[DataRequest, D
 // All implementations must embed UnimplementedBackupServiceServer
 // for forward compatibility.
 type BackupServiceServer interface {
+	SendName(context.Context, *NameRequest) (*NameResponse, error)
 	BackupBlock(grpc.ClientStreamingServer[DataRequest, DataResponse]) error
 	mustEmbedUnimplementedBackupServiceServer()
 }
@@ -65,6 +78,9 @@ type BackupServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBackupServiceServer struct{}
 
+func (UnimplementedBackupServiceServer) SendName(context.Context, *NameRequest) (*NameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendName not implemented")
+}
 func (UnimplementedBackupServiceServer) BackupBlock(grpc.ClientStreamingServer[DataRequest, DataResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method BackupBlock not implemented")
 }
@@ -89,6 +105,24 @@ func RegisterBackupServiceServer(s grpc.ServiceRegistrar, srv BackupServiceServe
 	s.RegisterService(&BackupService_ServiceDesc, srv)
 }
 
+func _BackupService_SendName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BackupServiceServer).SendName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BackupService_SendName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BackupServiceServer).SendName(ctx, req.(*NameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BackupService_BackupBlock_Handler(srv interface{}, stream grpc.ServerStream) error {
 	return srv.(BackupServiceServer).BackupBlock(&grpc.GenericServerStream[DataRequest, DataResponse]{ServerStream: stream})
 }
@@ -102,7 +136,12 @@ type BackupService_BackupBlockServer = grpc.ClientStreamingServer[DataRequest, D
 var BackupService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "backup.BackupService",
 	HandlerType: (*BackupServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SendName",
+			Handler:    _BackupService_SendName_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "BackupBlock",

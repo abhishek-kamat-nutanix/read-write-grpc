@@ -14,11 +14,8 @@ spec:
     spec:
       containers:
       - name: writer
-        image: abhishekkamat27/grpc_writer:ip3
+        image: abhishekkamat27/grpc_writer:volume
         command: ["./server"]
-        env:
-          - name: VOLUME_NAME
-            value: "wp-pv-claim1"
         ports:
         - containerPort: 50051
         securityContext:

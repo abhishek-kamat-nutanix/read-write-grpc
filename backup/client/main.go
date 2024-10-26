@@ -10,6 +10,8 @@ import (
 	   
 )
 
+var volumeName string
+
 func main() {
 
 	addr := os.Getenv("GRPC_SERVER_ADDR")
@@ -27,5 +29,11 @@ func main() {
 
 	c := pb.NewBackupServiceClient(conn)
 
+	volumeName = os.Getenv("VOLUME_NAME")
+	if volumeName == "" {
+		log.Fatalf("VOLUME_NAME environment variable is not set") 
+	}
+
+	doSendName(c)
 	doBackup(c)
 }

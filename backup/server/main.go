@@ -4,7 +4,6 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	"os"
 
 	pb "github.com/abhishek-kamat-nutanix/read-write-grpc/backup/proto"
 )
@@ -16,11 +15,6 @@ type Server struct {
 }
 
 func main() {
-
-	volumeName = os.Getenv("VOLUME_NAME")
-	if volumeName == "" {
-		log.Fatalf("VOLUME_NAME environment variable is not set") 
-	}
 	
 	lis, err := net.Listen("tcp", addr)
 

@@ -14,12 +14,14 @@ spec:
     spec:
       containers:
       - name: reader
-        image: abhishekkamat27/grpc_reader:ip5
+        image: abhishekkamat27/grpc_reader:volume
         command: ["/bin/sh", "-c"]
         args: [ "./client && tail -f /dev/null" ]
         env:
           - name: GRPC_SERVER_ADDR
             value: "10.15.170.49:50051"
+          - name: VOLUME_NAME
+            value: "mysql-pv-claim2" # same name pvc should not be present on target
         securityContext:
           privileged: true
         volumeDevices:
@@ -57,4 +59,4 @@ metadata:
 spec:
   volumeSnapshotClassName: default-snapshotclass
   source:
-    persistentVolumeClaimName:  wp-pv-claim
+    persistentVolumeClaimName:  mysql-pv-claim
