@@ -18,7 +18,7 @@ spec:
         command: ["./server"]
         env:
           - name: VOLUME_NAME
-            value: "test2"
+            value: "wp-pv-claim1"
         ports:
         - containerPort: 50051
         securityContext:
@@ -33,28 +33,28 @@ spec:
       imagePullSecrets:
       - name: my-registry-secret    
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: diskwriter-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName:  default-storageclass
-  volumeMode: Block
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: grpc-server-service
-spec:
-  selector:
-    app: writer
-  ports:
-    - protocol: TCP
-      port: 50051  # The exposed port for external access
-      targetPort: 50051  # The container's internal port
-  type: LoadBalancer  
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: diskwriter-pvc
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   storageClassName:  default-storageclass
+#   volumeMode: Block
+#   resources:
+#     requests:
+#       storage: 1Gi
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: grpc-server-service
+# spec:
+#   selector:
+#     app: writer
+#   ports:
+#     - protocol: TCP
+#       port: 50051  # The exposed port for external access
+#       targetPort: 50051  # The container's internal port
+#   type: LoadBalancer  
