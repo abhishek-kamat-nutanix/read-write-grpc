@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: reader-job
+spec:
+  completions: 1
+  template:
+    metadata:
+      labels:
+        app: reader
+    spec:
+      containers:
+      - name: reader
+        image: abhishekkamat27/grpc_reader:volume
+        command: ["./client"]
+        env:
+          - name: GRPC_SERVER_ADDR
+            value: "10.15.170.49:50051"
+          - name: VOLUME_NAME
+            value: "mysql-pv-claim2" # same name pvc should not be present on target        
+        securityContext:
+          privileged: true
+        volumeDevices:
+        - name: diskreader-pvc
+          devicePath: /dev/xvda
+      volumes:
+      - name: diskreader-pvc
+        persistentVolumeClaim:
+          claimName: diskreader-pvc
+      imagePullSecrets:
+      - name: my-registry-secret    
+      restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: diskreader-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName:  default-storageclass
+  volumeMode: Block
+  resources:
+    requests:
+      storage: 1Gi
+  dataSource:
+    name: source-sql
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+---
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: source-sql
+  namespace: default
+spec:
+  volumeSnapshotClassName: default-snapshotclass
+  source:
+    persistentVolumeClaimName:  mysql-pv-claim
