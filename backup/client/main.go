@@ -11,6 +11,7 @@ import (
 )
 
 var volumeName string
+var namespace string
 
 func main() {
 
@@ -33,6 +34,12 @@ func main() {
 	if volumeName == "" {
 		log.Fatalf("VOLUME_NAME environment variable is not set") 
 	}
+
+	namespace = os.Getenv("NAMESPACE")
+	if namespace == "" {
+		log.Fatalf("NAMESPACE environment variable is not set") 
+	}
+
 
 	doSendName(c)
 	doBackup(c)

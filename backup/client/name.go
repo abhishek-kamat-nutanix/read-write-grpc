@@ -10,7 +10,7 @@ import (
 func doSendName(c pb.BackupServiceClient) {
 	log.Println("doSendName was invoked")
 
-	req := &pb.NameRequest{Name: volumeName}
+	req := &pb.NameRequest{Name: volumeName, Namespace: namespace}
 
 	res, err := c.SendName(context.Background(), req)
 

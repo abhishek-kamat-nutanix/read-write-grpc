@@ -9,6 +9,8 @@ import (
 )
 func (s *Server)SendName(ctx context.Context,in *pb.NameRequest) (*pb.NameResponse, error) {
 	volumeName = in.Name
+	namespace = in.Namespace
 	log.Printf("received volume name : %v \n",volumeName)
-	return &pb.NameResponse{Message: "volume name set"}, nil
+	log.Printf("received namespace name : %v \n",namespace)
+	return &pb.NameResponse{Message: "volume and namespace name set"}, nil
 }
