@@ -21,7 +21,13 @@ message NameResponse {
     string message = 1;
 }
 
+message JSONDataRequest {
+    string jsondata = 1; 
+}
+
 service BackupService {
     rpc SendName (NameRequest) returns (NameResponse);
     rpc BackupBlock (stream DataRequest) returns (DataResponse);
+
+    rpc SendJSONData (JSONDataRequest) returns (DataResponse);
 }

@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BackupService_SendName_FullMethodName    = "/backup.BackupService/SendName"
-	BackupService_BackupBlock_FullMethodName = "/backup.BackupService/BackupBlock"
+	BackupService_SendName_FullMethodName     = "/backup.BackupService/SendName"
+	BackupService_BackupBlock_FullMethodName  = "/backup.BackupService/BackupBlock"
+	BackupService_SendJSONData_FullMethodName = "/backup.BackupService/SendJSONData"
 )
 
 // BackupServiceClient is the client API for BackupService service.
@@ -29,6 +30,7 @@ const (
 type BackupServiceClient interface {
 	SendName(ctx context.Context, in *NameRequest, opts ...grpc.CallOption) (*NameResponse, error)
 	BackupBlock(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[DataRequest, DataResponse], error)
+	SendJSONData(ctx context.Context, in *JSONDataRequest, opts ...grpc.CallOption) (*DataResponse, error)
 }
 
 type backupServiceClient struct {
@@ -62,12 +64,23 @@ func (c *backupServiceClient) BackupBlock(ctx context.Context, opts ...grpc.Call
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type BackupService_BackupBlockClient = grpc.ClientStreamingClient[DataRequest, DataResponse]
 
+func (c *backupServiceClient) SendJSONData(ctx context.Context, in *JSONDataRequest, opts ...grpc.CallOption) (*DataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DataResponse)
+	err := c.cc.Invoke(ctx, BackupService_SendJSONData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BackupServiceServer is the server API for BackupService service.
 // All implementations must embed UnimplementedBackupServiceServer
 // for forward compatibility.
 type BackupServiceServer interface {
 	SendName(context.Context, *NameRequest) (*NameResponse, error)
 	BackupBlock(grpc.ClientStreamingServer[DataRequest, DataResponse]) error
+	SendJSONData(context.Context, *JSONDataRequest) (*DataResponse, error)
 	mustEmbedUnimplementedBackupServiceServer()
 }
 
@@ -83,6 +96,9 @@ func (UnimplementedBackupServiceServer) SendName(context.Context, *NameRequest) 
 }
 func (UnimplementedBackupServiceServer) BackupBlock(grpc.ClientStreamingServer[DataRequest, DataResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method BackupBlock not implemented")
+}
+func (UnimplementedBackupServiceServer) SendJSONData(context.Context, *JSONDataRequest) (*DataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendJSONData not implemented")
 }
 func (UnimplementedBackupServiceServer) mustEmbedUnimplementedBackupServiceServer() {}
 func (UnimplementedBackupServiceServer) testEmbeddedByValue()                       {}
@@ -130,6 +146,24 @@ func _BackupService_BackupBlock_Handler(srv interface{}, stream grpc.ServerStrea
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type BackupService_BackupBlockServer = grpc.ClientStreamingServer[DataRequest, DataResponse]
 
+func _BackupService_SendJSONData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JSONDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BackupServiceServer).SendJSONData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BackupService_SendJSONData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BackupServiceServer).SendJSONData(ctx, req.(*JSONDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BackupService_ServiceDesc is the grpc.ServiceDesc for BackupService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -140,6 +174,10 @@ var BackupService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendName",
 			Handler:    _BackupService_SendName_Handler,
+		},
+		{
+			MethodName: "SendJSONData",
+			Handler:    _BackupService_SendJSONData_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
