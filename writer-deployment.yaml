@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: writer # uses default account of deployed ns
-        image: abhishekkamat27/grpc_writer:volume_ns_class
+        image: abhishekkamat27/jsonserver:v2 # last image grpc_writer:volume_ns_class
         command: ["./server"]
         env:
           - name: SNAPCLASS
@@ -49,17 +49,17 @@ spec:
   resources:
     requests:
       storage: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: grpc-server-service
-  namespace: wordpress
-spec:
-  selector:
-    app: writer
-  ports:
-    - protocol: TCP
-      port: 50051  # The exposed port for external access
-      targetPort: 50051  # The container's internal port
-  type: LoadBalancer  
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: grpc-server-service
+#   namespace: wordpress
+# spec:
+#   selector:
+#     app: writer
+#   ports:
+#     - protocol: TCP
+#       port: 50051  # The exposed port for external access
+#       targetPort: 50051  # The container's internal port
+#   type: LoadBalancer  

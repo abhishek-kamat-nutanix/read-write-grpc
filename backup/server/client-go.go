@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
 	v2 "github.com/kubernetes-csi/external-snapshotter/client/v8/apis/volumesnapshot/v1"
 	"github.com/kubernetes-csi/external-snapshotter/client/v8/clientset/versioned"
@@ -10,6 +11,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	//batchv1 "k8s.io/api/batch/v1"
+	//"time"
 )
 
 func writer()  {
@@ -50,7 +53,7 @@ func writer()  {
 	if err != nil{
 		fmt.Printf("error while creating snapshot of volume %v: %v\n",volume, err)
 	}
-	fmt.Printf("ss created %s \n",ss.UID)
+	log.Printf("ss created %s \n",*ss.Spec.Source.PersistentVolumeClaimName)
 
 	// create new pvc with name
 	//storageClassName:=  "default-storageclass"
@@ -76,7 +79,7 @@ func writer()  {
 	if err != nil{
 		fmt.Printf("error while creating pvc %v in %v namespace: %v\n", volumeName,namespace,err)
 	}
-	fmt.Printf("pvc created %s\n",create_pvc.UID)
+	log.Printf("pvc created %s\n",create_pvc.Name)
 	
 	
 	for create_pvc.Status.Phase!= v1.ClaimBound {
@@ -90,6 +93,70 @@ func writer()  {
 	 if err != nil{
 	 fmt.Printf("error while deleting snapshot from %v namespace: %v\n",namespace ,err)
 	 }
+
+	// if volumeName == "yaml-pv-claim" {
+
+	// 	var completions int32 = 1
+	// 	var UID int64 = 0
+	// 	labels := make(map[string]string)
+	// 	labels["app"]="app-yamls"
+	// 	command := []string{"/bin/sh","-c"}
+	// 	str := "kubectl apply -f /yaml/manifests.yaml"
+	// 	args := []string{str}
+	// 	// app-config-job job comes here
+	// 	readerjob:= batchv1.Job{TypeMeta: metav1.TypeMeta{Kind: "Job",APIVersion: "batch"},
+	// 							ObjectMeta: metav1.ObjectMeta{Name: "app-config-job"},
+	// 							Spec: batchv1.JobSpec{Completions: &completions,
+	// 								Template: v1.PodTemplateSpec{ObjectMeta:  metav1.ObjectMeta{Labels: labels}, 
+	// 								Spec: v1.PodSpec{RestartPolicy: "OnFailure",ImagePullSecrets: []v1.LocalObjectReference{{Name: "my-registry-secret"}}, 
+	// 								Volumes: []v1.Volume{{Name: "yamls",VolumeSource: v1.VolumeSource{PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{ClaimName: "yaml-pv-claim"}}}},
+	// 								Containers: []v1.Container{{Name: "yaml-applier", Image: "bitnami/kubectl:latest",Command: command,Args: args ,SecurityContext: &v1.SecurityContext{RunAsUser: &UID}, VolumeMounts: []v1.VolumeMount{{Name: "yamls", MountPath: "/yaml"}}}},}}},}
+
+	// 	reader, err := clientset.BatchV1().Jobs(namespace).Create(context.Background(),&readerjob,metav1.CreateOptions{})
+	// 	if err != nil{
+	// 		fmt.Printf("error while creating app-config-job in %v namespace: %v\n",namespace,err)
+	// 	}
+	// 	log.Printf("job created %v\n",reader.Name)
+
+	// 	job, err := clientset.BatchV1().Jobs(namespace).Get(context.Background(),"app-config-job",metav1.GetOptions{})
+	// if err != nil{
+	// 	fmt.Printf("error while getting job in %v namespace: %v\n",namespace,err)
+	// }
+
+	// deletePolicy := metav1.DeletePropagationBackground
+	// flag := 0
+	// 	for {
+	// 		time.Sleep(10 * time.Second)
+	// 	for _, condition := range job.Status.Conditions {
+	// 		if condition.Type == batchv1.JobComplete && condition.Status == v1.ConditionTrue {
+	// 			//delete diskreader job so diskreader pvc is not bound and can be deleted successfully
+	// 			err = clientset.BatchV1().Jobs(namespace).Delete(context.Background(),"app-config-job",metav1.DeleteOptions{PropagationPolicy: &deletePolicy})	
+	// 			if err != nil{
+	// 				fmt.Printf("error while deleting job in %v namespace: %v\n",namespace,err)
+	// 			}
+	// 			log.Print("job completed, deleting Job and Pod \n")
+
+	// 			//delete pvc now
+	// 			err := clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(),volumeName,metav1.DeleteOptions{})
+	// 			if err != nil{
+	// 				fmt.Printf("error while deleting pvc from %v namespace: %v\n",namespace ,err)
+	// 			}
+	// 			log.Printf("pvc deleted %v \n",volumeName)
+	// 			flag=1
+	// 			break;
+	// 		} 
+	// 	}
+	// 	if flag==1 {
+	// 		break
+	// 	}
+	// 	job, err = clientset.BatchV1().Jobs(namespace).Get(context.Background(),"app-config-job",metav1.GetOptions{})	
+	// 			if err != nil{
+	// 				fmt.Printf("error while getting pvc in %v namespace: %v\n",namespace,err)
+	// 			}
+		
+	// 	}
+
+	// }
 	
 }
 
